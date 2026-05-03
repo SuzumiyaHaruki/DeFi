@@ -6,14 +6,14 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 contract DeFi {
     struct User {
         address addr;
-        uint256 balance; 
+        uint256 balance;
         bool exist;
     }
 
     uint256 public totalDeposits;
     address public owner;
 
-    User[] public users; 
+    User[] public users;
     mapping(address => bool) public isAdmin;
     mapping(address => User) public map;
 
@@ -35,7 +35,6 @@ contract DeFi {
         users.push(temp);
     }
 
-
     modifier onlyOwner() {
         _onlyOwner();
         _;
@@ -54,13 +53,11 @@ contract DeFi {
         require(isAdmin[msg.sender], "Only admin can use this function!");
     }
 
-
     event DepositMade(address indexed user, uint256 amount);
     event WithdrawalMade(address indexed user, uint256 amount);
     event TransferMade(address indexed from, address indexed to, uint256 amount);
     event YieldDistributionStarted(uint256 totalYield);
     event YieldDistributed(uint256 totalYield);
-
 
     function deposit() public payable {
         require(!yieldDistributionActive, "Yield distribution active");
@@ -71,7 +68,7 @@ contract DeFi {
             users.push(temp);
         }
         // 以 wei 为单位进行存款
-        uint256 value = msg.value; 
+        uint256 value = msg.value;
         map[msg.sender].balance += value;
         totalDeposits += value;
         emit DepositMade(msg.sender, value);
@@ -85,7 +82,7 @@ contract DeFi {
         totalDeposits -= value;
 
         // Update accounting before the external call to avoid reentrancy issues.
-        (bool sent, ) = msg.sender.call{value: value}("");
+        (bool sent,) = msg.sender.call{value: value}("");
         require(sent, "Transfer failed");
 
         emit WithdrawalMade(msg.sender, value);
@@ -107,7 +104,6 @@ contract DeFi {
         emit TransferMade(msg.sender, to, value);
     }
 
-
     function setAdmin(address addr) public onlyOwner {
         require(addr != address(0), "Invalid admin");
 
@@ -121,7 +117,6 @@ contract DeFi {
     function deleteAdmin(address addr) public onlyOwner {
         isAdmin[addr] = false;
     }
-
 
     function startYieldDistribution() public onlyAdmin {
         require(!yieldDistributionActive, "Yield distribution active");
